@@ -1,0 +1,30 @@
+trigger:
+- main
+
+variables:
+  dockerRegistryServiceConnection: 'azacrservconn'
+  dockerfilePath: '$(Build.SourcesDirectory)/app/Dockerfile'
+  tag: '$(Build.BuildId)'
+ 
+stages:
+- stage: Build
+  displayName: Build and publish stage
+  jobs:
+  - job: Build
+    displayName: Build job
+    pool:
+      name: 'AzDevopsagent1'
+    steps:
+    - task: DockerInstaller@0
+      inputs:
+        dockerVersion: '28.2.2'
+
+    - task: Docker@2
+      displayName: Build and publish image to Azure Container Registry
+      inputs:
+        command: buildAndPush
+        containerRegistry: $(dockerRegistryServiceConnection)
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        tags: |
+          $(tag)
